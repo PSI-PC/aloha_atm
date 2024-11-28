@@ -267,15 +267,20 @@ def main():
     """
     # suite_dir = os.path.join(root, suite)
 
+    # torch limitations
+    torch.cuda.empty_cache()
+    # torch.cuda.set_per_process_memory_fraction(0.25, device=0)
+
     # setup cotracker
-    cotracker = torch.hub.load(
-        os.path.join(os.path.expanduser("~"), 
-                     ".cache/torch/hub/facebookresearch_co-tracker_main/"), 
-                     "cotracker2", 
-                     source="local",
-                     pretrained=False
-                     )
-    cotracker = cotracker.eval().cuda()
+    # cotracker = torch.hub.load(
+    #     os.path.join(os.path.expanduser("~"), 
+    #                  ".cache/torch/hub/facebookresearch_co-tracker_main/"), 
+    #                  "cotracker2", 
+    #                  source="local",
+    #                  pretrained=False,
+    #                  )
+    cotracker = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline").to('cuda')
+    # cotracker = cotracker.eval().cuda()
 
     # load task name embeddings
     # task_bert_embs_dict = get_task_bert_embs(root)
