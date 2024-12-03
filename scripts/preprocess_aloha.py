@@ -5,6 +5,7 @@ from glob import glob
 import click
 import h5py
 import numpy as np
+from cut_demo import cut_demo
 import torch
 from einops import rearrange
 from natsort import natsorted
@@ -70,12 +71,12 @@ def get_task_embs(cfg, descriptions):
     return task_embs
 
 
-def get_task_bert_embs(libero_root_dir):
-    libero_h5_files = glob(os.path.join(libero_root_dir, "*/*.hdf5"))
-    task_names = set([get_task_name_from_file_name(os.path.basename(file).split('.')[0]) for file in libero_h5_files])
-    task_names = list(task_names)
+def get_task_bert_embs(task_names): # originally root_dir also
+    # h5_files = glob(os.path.join(root_dir, "*/*.hdf5"))
+    # task_names = set([get_task_name_from_file_name(os.path.basename(file).split('.')[0]) for file in h5_files])
+    # task_names = list(task_names)
 
-    if not os.path.exists("libero/task_embedding_caches/task_emb_bert.npy"):
+    if not os.path.exists("aloha/task_embedding_caches/task_emb_bert.npy"):
         # set the task embeddings
         cfg = EasyDict({
             "task_embedding_format": "bert",
@@ -88,10 +89,10 @@ def get_task_bert_embs(libero_root_dir):
 
         task_name_to_emb = {task_names[i]: task_embs[i] for i in range(len(task_names))}
 
-        os.makedirs("libero/task_embedding_caches/", exist_ok=True)
-        np.save("libero/task_embedding_caches/task_emb_bert.npy", task_name_to_emb)
+        os.makedirs("aloha/task_embedding_caches/", exist_ok=True)
+        np.save("aloha/task_embedding_caches/task_emb_bert.npy", task_name_to_emb)
     else:
-        task_name_to_emb = np.load("libero/task_embedding_caches/task_emb_bert.npy", allow_pickle=True).item()
+        task_name_to_emb = np.load("aloha/task_embedding_caches/task_emb_bert.npy", allow_pickle=True).item()
     return task_name_to_emb
 
 
@@ -124,7 +125,7 @@ def track_and_remove(tracker, video, points, var_threshold=10.):
     return pred_tracks, pred_vis
 
 
-def track_through_video(video, track_model, num_points=1000):
+def track_through_video(video, track_model, num_points=150):
     T, C, H, W = video.shape
 
     video = torch.from_numpy(video).cuda().float()
@@ -148,7 +149,7 @@ def track_through_video(video, track_model, num_points=1000):
     return pred_tracks, pred_vis
 
 
-def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_names, track_model, num_points, visualizer, save_vis=False):
+def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_names, track_model, task_emb, num_points, visualizer, save_vis=True):
     actions = np.array(demonstration['action'])
     root_grp = new_hdf5_file.create_group("root") if "root" not in new_hdf5_file else new_hdf5_file["root"]
     if "action" not in root_grp:
@@ -160,40 +161,57 @@ def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_
     #     for state_key in EXTRA_STATES_KEYS:
     #         extra_states_grp.create_dataset(state_key, data=np.array(demos_group[demo_k]['obs'][state_key]))
 
-    # if "task_emb_bert" not in root_grp:
-    #     root_grp.create_dataset("task_emb_bert", data=task_emb)
+    if "task_emb_bert" not in root_grp:
+        root_grp.create_dataset("task_emb_bert", data=task_emb)
 
     for view in view_names:
+        if view == 'cam_low': # for testing
+            break
         images = demonstration['observations']['images']
-        rgb = np.array(images[view])
-        # rgb = rgb[:, ::-1, :, :].copy()  # The images in the raw Libero dataset is upsidedown, so we need to flip it
-        rgb = rearrange(rgb, "t h w c -> t c h w")
-        T, C, H, W = rgb.shape
+        snippets = cut_demo(images, view)[5:10]
 
-        pred_tracks, pred_vis = track_through_video(rgb, track_model, num_points=num_points)
-
-        if save_vis:
-            visualizer.visualize(torch.from_numpy(rgb)[None], pred_tracks, pred_vis, filename=f"{demonstration}_{view}")
-
-        # [1, T, N, 2], normalize coordinates to [0, 1] for in-picture coordinates
-        pred_tracks[:, :, :, 0] /= W
-        pred_tracks[:, :, :, 1] /= H
-
-        # hierarchically save arrays under the view name
         view_grp = root_grp.create_group(view) if view not in root_grp else root_grp[view]
-        if "video" not in view_grp:
-            view_grp.create_dataset("video", data=rgb[None].astype(np.uint8))
+        snippet_counter = 0
 
-        # we always update the tracks and vis when you run this script
-        if "tracks" in view_grp:
-            view_grp.__delitem__("tracks")
-        if "vis" in view_grp:
-            view_grp.__delitem__("vis")
-        view_grp.create_dataset("tracks", data=pred_tracks.cpu().numpy())
-        view_grp.create_dataset("vis", data=pred_vis.cpu().numpy())
+        all_pred_tracks = []
+        all_pred_vis = []
+        for snippet in snippets:
+            snippet_str = f'snippet_{snippet_counter}'
 
-        # save image pngs
-        save_images(rearrange(rgb, "t c h w -> t h w c"), image_save_dir, view)
+            rgb = snippet
+            # rgb = np.array(images[view])
+            # rgb = rgb[:, ::-1, :, :].copy()  # The images in the raw Libero dataset is upsidedown, so we need to flip it
+            rgb = rearrange(rgb, "t h w c -> t c h w")
+            T, C, H, W = rgb.shape
+
+            pred_tracks, pred_vis = track_through_video(rgb, track_model, num_points=num_points)
+
+            if save_vis:
+                visualizer.visualize(torch.from_numpy(rgb)[None], pred_tracks, pred_vis, filename=f"{view}_{snippet_str}")
+
+            # [1, T, N, 2], normalize coordinates to [0, 1] for in-picture coordinates
+            pred_tracks[:, :, :, 0] /= W
+            pred_tracks[:, :, :, 1] /= H
+
+            all_pred_tracks.append(pred_tracks)
+            all_pred_vis.append(pred_vis)
+
+            # hierarchically save arrays under the view name
+            snippet_grp = view_grp.create_group(snippet_str) if snippet_str not in view_grp else view_grp[snippet_str]
+            if "video" not in snippet_grp:
+                snippet_grp.create_dataset("video", data=rgb[None].astype(np.uint8))
+
+            # we always update the tracks and vis when you run this script
+            if "tracks" in snippet_grp:
+                snippet_grp.__delitem__("tracks")
+            if "vis" in snippet_grp:
+                snippet_grp.__delitem__("vis")
+            snippet_grp.create_dataset("tracks", data=pred_tracks.cpu().numpy())
+            snippet_grp.create_dataset("vis", data=pred_vis.cpu().numpy())
+
+            # save image pngs
+            save_images(rearrange(rgb, "t c h w -> t h w c"), f'{image_save_dir}/{view}/{snippet_str}', 'image')
+            snippet_counter += 1
 
 
 def save_images(video, image_dir, view_name):
@@ -221,7 +239,7 @@ def get_view_names(demonstration_hdf5_file):
     return views
 
 
-def generate_data(source_h5_path, target_dir, track_model): #task emb geloescht
+def generate_data(source_h5_path, target_dir, task_emb, track_model): #task emb geloescht
     demonstration = h5py.File(source_h5_path, 'r')
     # demo_keys = natsorted(list(demo.keys()))
     views = get_view_names(source_h5_path)
@@ -234,16 +252,16 @@ def generate_data(source_h5_path, target_dir, track_model): #task emb geloescht
     video_path = os.path.join(target_dir, 'videos')
     if not os.path.exists(video_path):
         os.makedirs(video_path, exist_ok=True)
-    visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
+    visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=50)
 
-    num_points = 1000
+    num_points = 150 #originallz 1000
     with torch.no_grad():
-        save_path = os.path.join(target_dir, f"new_episode_1.hdf5")
+        save_path = os.path.join(target_dir, f"preprocessed_episode_1.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
-        image_save_dir = os.path.join(target_dir, "images", source_h5_path)
+        image_save_dir = os.path.join(target_dir, "images")
 
         try:
-            collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, views, track_model, num_points, visualizer)
+            collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, views, track_model, task_emb, num_points, visualizer)
             new_hdf5_file.close()
             print(f"{save_path} is completed.")
         except Exception as e:
@@ -282,22 +300,25 @@ def main():
     cotracker = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline").to('cuda')
     # cotracker = cotracker.eval().cuda()
 
-    # load task name embeddings
-    # task_bert_embs_dict = get_task_bert_embs(root)
-
-    # for source_h5 in os.listdir(suite_dir):
-    #     source_h5_path = os.path.join(suite_dir, source_h5)
-    #     file_name = source_h5.split('.')[0]
-    #     task_name = get_task_name_from_file_name(file_name)
- 
-    #     save_dir = os.path.join(save, suite, file_name)
-    #     os.makedirs(save_dir, exist_ok=True)
     task_name = "put lampshade on lampholder"
+    origin_dir = "data/demos"
+    result_dir = "data/preprocessed_demos"
+
+    # load task name embeddings
+    task_bert_embs_dict = get_task_bert_embs([task_name])
+
+    for source_h5 in os.listdir(origin_dir):
+        source_h5_path = os.path.join(origin_dir, source_h5)
+        file_name = source_h5.split('.')[0]
+        # task_name = get_task_name_from_file_name(file_name)
+ 
+        save_dir = os.path.join(result_dir, file_name)
+        os.makedirs(save_dir, exist_ok=True)
+    
     # task_name = get_task_name_from_file_name(task_name)
-    save_dir = "scripts"
-    source_h5_path = "scripts/episode_1.hdf5"
+    
     skip_exist = False
-    generate_data(source_h5_path, save_dir, cotracker)
+    generate_data(source_h5_path, save_dir, task_bert_embs_dict[task_name], cotracker)
 
 
 if __name__ == "__main__":
