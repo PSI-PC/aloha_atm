@@ -4,14 +4,17 @@ import numpy as np
 FILE = 'episode_1.hdf5'
 
 def cut_demo(images, view):
-    # h5_dict = load_h5(FILE)
-    # images = h5_dict['observations']['images']
-    cut_view = []
-    for frames in range(0, 901, 50):
-        cut_view.append(images[view][frames : frames + 100])
+   # h5_dict = load_h5(FILE)
+   # images = h5_dict['observations']['images']
+   cut_view = []
+   for frames in range(0, 401, 50):
+      cut_view.append(images[view][frames : frames + 100])
         
-    # return cut images
-    return np.array(cut_view)
+   
+   # return cut images
+   arr = np.array(cut_view)
+   shpae = arr.shape
+   return np.array(cut_view)
     
 
 

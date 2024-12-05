@@ -168,7 +168,7 @@ def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_
         if view == 'cam_low': # for testing
             break
         images = demonstration['observations']['images']
-        snippets = cut_demo(images, view)[5:10]
+        snippets = cut_demo(images, view)
 
         view_grp = root_grp.create_group(view) if view not in root_grp else root_grp[view]
         snippet_counter = 0
@@ -239,7 +239,7 @@ def get_view_names(demonstration_hdf5_file):
     return views
 
 
-def generate_data(source_h5_path, target_dir, task_emb, track_model): #task emb geloescht
+def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model): #task emb geloescht
     demonstration = h5py.File(source_h5_path, 'r')
     # demo_keys = natsorted(list(demo.keys()))
     views = get_view_names(source_h5_path)
@@ -252,11 +252,11 @@ def generate_data(source_h5_path, target_dir, task_emb, track_model): #task emb 
     video_path = os.path.join(target_dir, 'videos')
     if not os.path.exists(video_path):
         os.makedirs(video_path, exist_ok=True)
-    visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=50)
+    visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
 
-    num_points = 150 #originallz 1000
+    num_points = 150 # originally 1000
     with torch.no_grad():
-        save_path = os.path.join(target_dir, f"preprocessed_episode_1.hdf5")
+        save_path = os.path.join(target_dir, f"preprocessed_{file_name}.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
         image_save_dir = os.path.join(target_dir, "images")
 
@@ -289,25 +289,28 @@ def main():
     torch.cuda.empty_cache()
     # torch.cuda.set_per_process_memory_fraction(0.25, device=0)
 
-    # setup cotracker
-    # cotracker = torch.hub.load(
-    #     os.path.join(os.path.expanduser("~"), 
-    #                  ".cache/torch/hub/facebookresearch_co-tracker_main/"), 
-    #                  "cotracker2", 
-    #                  source="local",
-    #                  pretrained=False,
-    #                  )
+
+    print("START LOADING COTRACKER")
+
     cotracker = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline").to('cuda')
-    # cotracker = cotracker.eval().cuda()
+
+    print("STOP LOADING COTRACKER")
 
     task_name = "put lampshade on lampholder"
     origin_dir = "data/demos"
     result_dir = "data/preprocessed_demos"
 
+    print("START LOADING EMBEDDING")
+
     # load task name embeddings
     task_bert_embs_dict = get_task_bert_embs([task_name])
 
+    print("STOP LOADING EMBEDDING")
+
+    print("START PREPROCESSING DEMOS")
+
     for source_h5 in os.listdir(origin_dir):
+        print(f"PREPROCESSING {source_h5}")
         source_h5_path = os.path.join(origin_dir, source_h5)
         file_name = source_h5.split('.')[0]
         # task_name = get_task_name_from_file_name(file_name)
@@ -317,8 +320,10 @@ def main():
     
     # task_name = get_task_name_from_file_name(task_name)
     
-    skip_exist = False
-    generate_data(source_h5_path, save_dir, task_bert_embs_dict[task_name], cotracker)
+        skip_exist = False
+        generate_data(source_h5_path, file_name, save_dir, task_bert_embs_dict[task_name], cotracker)
+
+    print("STOP PREPROCESSING DEMOS")
 
 
 if __name__ == "__main__":
