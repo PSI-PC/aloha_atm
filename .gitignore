@@ -1,2 +1,6 @@
 aloha/
 data/
+output_videos/
+results/
+wandb/
+third_party/

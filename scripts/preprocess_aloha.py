@@ -21,8 +21,8 @@ path_root = Path(__file__).parents[1]
 sys.path.append(str(path_root))
 # print(sys.path)
 
-from utils.flow_utils import sample_from_mask, sample_double_grid
-from utils.cotracker_utils import Visualizer
+from atm.utils.flow_utils import sample_from_mask, sample_double_grid
+from atm.utils.cotracker_utils import Visualizer
 
 os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
@@ -244,7 +244,7 @@ def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model):
     # demo_keys = natsorted(list(demo.keys()))
     views = get_view_names(source_h5_path)
 
-    # # save environment meta data
+    # save environment meta data
     # with open(os.path.join(target_dir, 'env_meta.json'), 'w') as fp:
     #     json.dump(attrs, fp)
 
@@ -294,18 +294,18 @@ def main():
 
     cotracker = torch.hub.load("facebookresearch/co-tracker", "cotracker3_offline").to('cuda')
 
-    print("STOP LOADING COTRACKER")
+    print("FINISH LOADING COTRACKER")
 
     task_name = "put lampshade on lampholder"
-    origin_dir = "data/demos"
-    result_dir = "data/preprocessed_demos"
+    origin_dir = "data/demos/aloha_lamp/lamp_right_arm"
+    result_dir = "data/preprocessed_demos/aloha_lamp/lamp_right_arm"
 
     print("START LOADING EMBEDDING")
 
     # load task name embeddings
     task_bert_embs_dict = get_task_bert_embs([task_name])
 
-    print("STOP LOADING EMBEDDING")
+    print("FINISH LOADING EMBEDDING")
 
     print("START PREPROCESSING DEMOS")
 
@@ -323,7 +323,7 @@ def main():
         skip_exist = False
         generate_data(source_h5_path, file_name, save_dir, task_bert_embs_dict[task_name], cotracker)
 
-    print("STOP PREPROCESSING DEMOS")
+    print("FINISH PREPROCESSING DEMOS")
 
 
 if __name__ == "__main__":

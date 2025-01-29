@@ -1,0 +1,118 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /home/i53/student/gorhan/development/aloha_atm/third_party/robosuite/robosuite/scripts/setup_macros.py (macros.py:55)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+[robosuite WARNING] Could not import robosuite_models. Some robots may not be available. If you want to use these robots, please install robosuite_models from source (https://github.com/ARISE-Initiative/robosuite_models) or through pip install. (__init__.py:30)
+
+Seed set to 0
+found 3 trajectories in the specified folders: ['./data/preprocessed_demos/train/']
+found 3 trajectories in the specified folders: ['./data/preprocessed_demos/train/']
+found 1 trajectories in the specified folders: ['./data/preprocessed_demos/val/']
+found 1 trajectories in the specified folders: ['./data/preprocessed_demos/val/']
+[2025-01-09 16:08:52,822] [INFO] [real_accelerator.py:158:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+[rank: 0] Seed set to 0
+initializing deepspeed distributed: GLOBAL_RANK: 0, MEMBER: 1/1
+[2025-01-09 16:08:55,382][torch.distributed.distributed_c10d][INFO] - Added key: store_based_barrier_key:1 to store for rank: 0
+[2025-01-09 16:08:55,383][torch.distributed.distributed_c10d][INFO] - Rank 0: Completed store-based barrier for key:store_based_barrier_key:1 with 1 nodes.
+Config:
+- experiment:
+  - atm-policy_demo4
+- wandb:
+  - project: atm_policy
+  - name: 0109_atm-policy_demo4_1608_seed0_None
+  - group: atm-policy_demo4
+- train_gpus:
+  - [0]
+- lr:
+  - 6.25e-05
+- batch_size:
+  - 16
+- mix_precision:
+  - False
+- num_workers:
+  - 8
+- val_freq:
+  - 5
+- save_freq:
+  - 10
+- clip_grad:
+  - 100.0
+- epochs:
+  - 101
+- seed:
+  - 0
+- dry:
+  - False
+- img_size:
+  - 128
+- frame_stack:
+  - 10
+- num_track_ts:
+  - 16
+- num_track_ids:
+  - 32
+- extra_state_keys:
+  - []
+- aug_prob:
+  - 0.9
+- train_dataset:
+  - ['./data/preprocessed_demos/train/']
+- val_dataset:
+  - ['./data/preprocessed_demos/val/']
+- val_num_demos:
+  - None
+- env_cfg:
+  - env_type: libero
+  - render_gpu_ids: 0
+  - vec_env_num: 10
+  - horizon: 600
+  - env_name: []
+  - task_name: []
+  - env_meta_fn: []
+- optimizer_cfg:
+  - type: optim.AdamW
+  - params: {'lr': 6.25e-05, 'weight_decay': 0.0001}
+- scheduler_cfg:
+  - type: CosineAnnealingLR
+  - params: {'T_max': 101, 'eta_min': 0.0, 'last_epoch': -1}
+- model_name:
+  - BCViLTPolicy
+- model_cfg:
+  - load_path: None
+  - obs_cfg: {'obs_shapes': {'rgb': [3, 128, 128], 'tracks': [16, 32, 2]}, 'img_mean': [0.0, 0.0, 0.0], 'img_std': [1.0, 1.0, 1.0], 'num_views': 1, 'extra_states': [], 'max_seq_len': 10}
+  - img_encoder_cfg: {'network_name': 'PatchEncoder', 'patch_size': [8, 8], 'embed_size': 128, 'no_patch_embed_bias': False}
+  - language_encoder_cfg: {'network_name': 'MLPEncoder', 'input_size': 768, 'hidden_size': 128, 'num_layers': 1}
+  - extra_state_encoder_cfg: {'extra_num_layers': 0, 'extra_hidden_size': 128}
+  - track_cfg: {'track_fn': './results/track_transformer/0109_aloha_track_transformer_ep101_1332/', 'policy_track_patch_size': 16, 'use_zero_track': False}
+  - spatial_transformer_cfg: {'num_layers': 7, 'num_heads': 8, 'head_output_size': 120, 'mlp_hidden_size': 256, 'dropout': 0.1, 'spatial_downsample': True, 'spatial_downsample_embed_size': 64, 'use_language_token': False}
+  - temporal_transformer_cfg: {'num_layers': 4, 'num_heads': 6, 'head_output_size': 64, 'mlp_hidden_size': 256, 'dropout': 0.1, 'use_language_token': False}
+  - policy_head_cfg: {'network_name': 'DeterministicHead', 'output_size': [14], 'hidden_size': 1024, 'num_layers': 2, 'loss_coef': 1.0, 'action_squash': False}
+- dataset_cfg:
+  - img_size: 128
+  - frame_stack: 10
+  - num_track_ts: 16
+  - num_track_ids: 32
+  - track_obs_fs: 1
+  - augment_track: False
+  - extra_state_keys: []
+  - cache_all: True
+  - cache_image: False
+Error executing job with overrides: ['train_gpus=[0]', 'experiment=atm-policy_demo4', "train_dataset=['./data/preprocessed_demos/train/']", "val_dataset=['./data/preprocessed_demos/val/']", 'model_cfg.track_cfg.track_fn=./results/track_transformer/0109_aloha_track_transformer_ep101_1332/', 'model_cfg.track_cfg.use_zero_track=False', 'model_cfg.spatial_transformer_cfg.use_language_token=False', 'model_cfg.temporal_transformer_cfg.use_language_token=False', 'seed=0']
+Traceback (most recent call last):
+  File "/home/i53/student/gorhan/development/aloha_atm/engine/train_bc.py", line 54, in main
+    None if (cfg.dry or not fabric.is_global_zero) else init_wandb(cfg)
+  File "/home/i53/student/gorhan/development/aloha_atm/atm/utils/train_utils.py", line 13, in init_wandb
+    wandb.init(
+  File "/home/i53/student/gorhan/miniconda3/envs/aloha_atm/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 1183, in init
+    raise e
+  File "/home/i53/student/gorhan/miniconda3/envs/aloha_atm/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 1160, in init
+    wi.setup(kwargs)
+  File "/home/i53/student/gorhan/miniconda3/envs/aloha_atm/lib/python3.9/site-packages/wandb/sdk/wandb_init.py", line 306, in setup
+    wandb_login._login(
+  File "/home/i53/student/gorhan/miniconda3/envs/aloha_atm/lib/python3.9/site-packages/wandb/sdk/wandb_login.py", line 298, in _login
+    wlogin.prompt_api_key()
+  File "/home/i53/student/gorhan/miniconda3/envs/aloha_atm/lib/python3.9/site-packages/wandb/sdk/wandb_login.py", line 228, in prompt_api_key
+    raise UsageError("api_key not configured (no-tty). call " + directive)
+wandb.errors.UsageError: api_key not configured (no-tty). call wandb.login(key=[your_api_key])
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.

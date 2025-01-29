@@ -11,13 +11,7 @@ def cut_demo(images, view):
       cut_view.append(images[view][frames : frames + 100])
         
    
-   # return cut images
-   arr = np.array(cut_view)
-   shpae = arr.shape
    return np.array(cut_view)
-    
-
-
 
 def load_h5(file_path):
    # return as a dict.
@@ -33,10 +27,11 @@ def load_h5(file_path):
    with h5py.File(file_path, 'r') as f:
       return h5_to_dict(f)
    
-# def main():
-#     print(cut_demo(FILE, 'cam_high'))
+def main():
+   h5 = load_h5("./data/preprocessed_demos/train/preprocessed_episode_0.hdf5")
+   print(h5['root']['action'].shape)
 
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
 
