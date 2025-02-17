@@ -167,50 +167,64 @@ def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_
         if view == 'cam_low': # for testing
             break
         images = demonstration['observations']['images']
-        snippets = cut_demo(images, view)
+        # snippets = cut_demo(images, view)
 
         view_grp = root_grp.create_group(view) if view not in root_grp else root_grp[view]
-        snippet_counter = 0
+        # snippet_counter = 0
 
-        all_pred_tracks = []
-        all_pred_vis = []
-        for snippet in snippets:
-            snippet_str = f'snippet_{snippet_counter}'
+        # all_pred_tracks = []
+        # all_pred_vis = []
+        # for snippet in snippets:
+            # snippet_str = f'snippet_{snippet_counter}'
 
-            rgb = snippet
-            # rgb = np.array(images[view])
-            # rgb = rgb[:, ::-1, :, :].copy()  # The images in the raw Libero dataset is upsidedown, so we need to flip it
-            rgb = rearrange(rgb, "t h w c -> t c h w")
-            T, C, H, W = rgb.shape
+            # rgb = snippet
+        rgb = np.array(images[view])
+        # rgb = rgb[:, ::-1, :, :].copy()  # The images in the raw Libero dataset is upsidedown, so we need to flip it
+        rgb = rearrange(rgb, "t h w c -> t c h w")
+        T, C, H, W = rgb.shape
 
-            pred_tracks, pred_vis = track_through_video(rgb, track_model, num_points=num_points)
+        pred_tracks, pred_vis = track_through_video(rgb, track_model, num_points=num_points)
 
-            if save_vis:
-                visualizer.visualize(torch.from_numpy(rgb)[None], pred_tracks, pred_vis, filename=f"{view}_{snippet_str}")
+        if save_vis:
+            visualizer.visualize(torch.from_numpy(rgb)[None], pred_tracks, pred_vis, filename=f"{view}") #_{snippet_str}")
 
-            # [1, T, N, 2], normalize coordinates to [0, 1] for in-picture coordinates
-            pred_tracks[:, :, :, 0] /= W
-            pred_tracks[:, :, :, 1] /= H
+        # [1, T, N, 2], normalize coordinates to [0, 1] for in-picture coordinates
+        pred_tracks[:, :, :, 0] /= W
+        pred_tracks[:, :, :, 1] /= H
 
-            all_pred_tracks.append(pred_tracks)
-            all_pred_vis.append(pred_vis)
+        # all_pred_tracks.append(pred_tracks)
+        # all_pred_vis.append(pred_vis)
 
-            # hierarchically save arrays under the view name
-            snippet_grp = view_grp.create_group(snippet_str) if snippet_str not in view_grp else view_grp[snippet_str]
-            if "video" not in snippet_grp:
-                snippet_grp.create_dataset("video", data=rgb[None].astype(np.uint8))
+        # hierarchically save arrays under the view name
+        # snippet_grp = view_grp.create_group(snippet_str) if snippet_str not in view_grp else view_grp[snippet_str]
+        # if "video" not in snippet_grp:
+        #     snippet_grp.create_dataset("video", data=rgb[None].astype(np.uint8))
 
-            # we always update the tracks and vis when you run this script
-            if "tracks" in snippet_grp:
-                snippet_grp.__delitem__("tracks")
-            if "vis" in snippet_grp:
-                snippet_grp.__delitem__("vis")
-            snippet_grp.create_dataset("tracks", data=pred_tracks.cpu().numpy())
-            snippet_grp.create_dataset("vis", data=pred_vis.cpu().numpy())
+        view_grp = root_grp.create_group(view) if view not in root_grp else root_grp[view]
+        if "video" not in view_grp:
+            view_grp.create_dataset("video", data=rgb[None].astype(np.uint8))
 
-            # save image pngs
-            save_images(rearrange(rgb, "t c h w -> t h w c"), f'{image_save_dir}/{view}/{snippet_str}', 'image')
-            snippet_counter += 1
+        if "tracks" in view_grp:
+            view_grp.__delitem__("tracks")
+        if "vis" in view_grp:
+            view_grp.__delitem__("vis")
+        view_grp.create_dataset("tracks", data=pred_tracks.cuda().numpy())
+        view_grp.create_dataset("vis", data=pred_vis.cuda().numpy())
+
+        # save image pngs
+        save_images(rearrange(rgb, "t c h w -> t h w c"), image_save_dir, view)
+
+        # # we always update the tracks and vis when you run this script
+        # if "tracks" in snippet_grp:
+        #     snippet_grp.__delitem__("tracks")
+        # if "vis" in snippet_grp:
+        #     snippet_grp.__delitem__("vis")
+        # snippet_grp.create_dataset("tracks", data=pred_tracks.cpu().numpy())
+        # snippet_grp.create_dataset("vis", data=pred_vis.cpu().numpy())
+
+        # # save image pngs
+        # save_images(rearrange(rgb, "t c h w -> t h w c"), f'{image_save_dir}/{view}/{snippet_str}', 'image')
+        # snippet_counter += 1
 
 
 def save_images(video, image_dir, view_name):
@@ -253,7 +267,7 @@ def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model):
         os.makedirs(video_path, exist_ok=True)
     visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
 
-    num_points = 150 # originally 1000
+    num_points = 1000 #150 # originally 1000
     with torch.no_grad():
         save_path = os.path.join(target_dir, f"preprocessed_{file_name}.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
