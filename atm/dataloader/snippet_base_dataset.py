@@ -74,6 +74,8 @@ class BaseDataset(Dataset):
         print(f"found {len(self.buffer_fns)} trajectories in the specified folders: {self.dataset_dir}")
 
         self._cache = []
+        self._index_to_view_id = {}
+        self._index_to_snippet_id = {}
         self._index_to_demo_id, self._demo_id_to_path, self._demo_id_to_start_indices, self._demo_id_to_demo_length \
             = {}, {}, {}, {}
         self.load_demo_info()
@@ -95,29 +97,34 @@ class BaseDataset(Dataset):
                 # self.views.remove("extra_states")
                 self.views.sort()
 
-            demo_len = demo["root"][self.views[0]]["video"][0].shape[0]
+            view_key = demo["root"][self.views[0]]
+            for snippet_idx in range(0, len(view_key), 2):
+                demo_len = view_key[f"snippet_{snippet_idx}"]["video"][0].shape[0]
 
-            if self.cache_all:
-                demo = self.process_demo(demo)
-                if not self.cache_image:
-                    for v in self.views:
-                        del demo["root"][v]["video"]
-                self._cache.append(demo)
-            self._demo_id_to_path[demo_idx] = fn
-            self._index_to_demo_id.update({k: demo_idx for k in range(start_idx, start_idx + demo_len)})
-            self._demo_id_to_start_indices[demo_idx] = start_idx
-            self._demo_id_to_demo_length[demo_idx] = demo_len
-            start_idx += demo_len
+                if self.cache_all:
+                    demo = self.process_demo(demo, snippet_idx)
+                    if not self.cache_image:
+                        for v in self.views:
+                            del demo["root"][v][f"snippet_{snippet_idx}"]["video"]
+                    self._cache.append(demo)
+                self._demo_id_to_path[demo_idx] = fn
+                self._index_to_demo_id.update({k: demo_idx for k in range(start_idx, start_idx + demo_len)})
+                self._index_to_view_id.update({k: 0 for k in range(start_idx, start_idx + demo_len)})
+                self._index_to_snippet_id.update({k: snippet_idx for k in range(start_idx, start_idx + demo_len)})
+                self._demo_id_to_start_indices[demo_idx, snippet_idx] = start_idx
+                self._demo_id_to_demo_length[demo_idx] = demo_len
+                start_idx += demo_len
 
         num_samples = len(self._index_to_demo_id)
         assert num_samples == start_idx
 
-    def process_demo(self, demo):
+    def process_demo(self, demo, snippet_idx):
         pad_length = self.frame_stack + self.num_track_ts
         for v in self.views:
-            vids = demo["root"][v]['video'][0]  # t, c, h, w
-            tracks = demo["root"][v]['tracks'][0]  # t, num_tracks, 2
-            vis = demo["root"][v]['vis'][0]  # t, num_tracks
+            # view_key = demo["root"][self.views[0]]
+            vids = demo["root"][v][f"snippet_{snippet_idx}"]['video'][0]  # t, c, h, w
+            tracks = demo["root"][v][f"snippet_{snippet_idx}"]['tracks'][0]  # t, num_tracks, 2
+            vis = demo["root"][v][f"snippet_{snippet_idx}"]['vis'][0]  # t, num_tracks
 
             t, c, h, w = vids.shape
 
@@ -132,9 +139,9 @@ class BaseDataset(Dataset):
             if h != self.img_size[0] or w != self.img_size[1]:
                 vids = F.interpolate(vids, size=self.img_size, mode="bilinear", align_corners=False)
 
-            demo["root"][v]['video'] = vids
-            demo["root"][v]['tracks'] = tracks
-            demo["root"][v]['vis'] = vis
+            demo["root"][v][f"snippet_{snippet_idx}"]['video'] = vids
+            demo["root"][v][f"snippet_{snippet_idx}"]['tracks'] = tracks
+            demo["root"][v][f"snippet_{snippet_idx}"]['vis'] = vis
 
         actions = demo["root"]["action"]
         if actions.ndim == 3:
@@ -149,8 +156,8 @@ class BaseDataset(Dataset):
         # pad extra states
         # last_extra_states = {k: v[-1:] for k, v in extra_states_dict.items()}
         # extra_states_dict = {
-        #     k: np.concatenate([extra_states_dict[k], np.repeat(last_extra_states[k], pad_length, axis=0)], axis=0)
-        #     for k in extra_states_dict
+            # k: np.concatenate([extra_states_dict[k], np.repeat(last_extra_states[k], pad_length, axis=0)], axis=0)
+            # for k in extra_states_dict
         # }
 
         actions = torch.Tensor(actions)
@@ -163,27 +170,28 @@ class BaseDataset(Dataset):
 
         return demo
 
-    def _load_image_list_from_demo(self, demo, view, time_offset, num_frames=None, backward=False):
+    def _load_image_list_from_demo(self, demo, view, snippet_key, time_offset, num_frames=None, backward=False):
         num_frames = self.frame_stack if num_frames is None else num_frames
-        demo_length = demo["root"][view]["video"].shape[0]
+        demo_length = demo["root"][view][snippet_key]["video"].shape[0]
         if backward:
             image_indices = np.arange(max(time_offset + 1 - num_frames, 0), time_offset + 1)
             image_indices = np.clip(image_indices, a_min=None, a_max=demo_length-1)
-            frames = demo['root'][view]["video"][image_indices]
+            frames = demo['root'][view][snippet_key]["video"][image_indices]
             if len(frames) < num_frames:
                 padding_frames = torch.zeros((num_frames - len(frames), *frames.shape[1:]))  # padding with black images
                 frames = torch.cat([padding_frames, frames], dim=0)
             return frames
         else:
-            return demo['root'][view]["video"][time_offset:time_offset + num_frames]
+            return demo['root'][view][snippet_key]["video"][time_offset:time_offset + num_frames]
 
-    def _load_image_list_from_disk(self, demo_id, view, time_offset, num_frames=None, backward=False):
+    def _load_image_list_from_disk(self, demo_id, view, snippet_key, time_offset, num_frames=None, backward=False):
         num_frames = self.frame_stack if num_frames is None else num_frames
 
         demo_length = self._demo_id_to_demo_length[demo_id]
         demo_path = self._demo_id_to_path[demo_id]
         demo_parent_dir = os.path.dirname(os.path.dirname(demo_path))
-        demo_name = os.path.basename(demo_path).split(".")[0]
+        # demo_name = os.path.basename(demo_path).split(".")[0]
+        demo_name = snippet_key
         images_dir = os.path.join(demo_parent_dir, f"episode_{demo_id}/images", view, demo_name)
 
         if backward:
@@ -199,6 +207,8 @@ class BaseDataset(Dataset):
         frames = np.stack(frames)  # t h w c
         frames = torch.Tensor(frames)
         frames = rearrange(frames, "t h w c -> t c h w")
+
+        frames = F.interpolate(frames, size=self.img_size, mode="bilinear", align_corners=False)
         return frames
 
     def load_h5(self, fn):
@@ -216,7 +226,7 @@ class BaseDataset(Dataset):
             return h5_to_dict(f)
 
     def __len__(self):
-        return len(self._index_to_demo_id)
+        return len(self._index_to_demo_id) # int & durch 10 gemacht
 
     def __getitem__(self, index):
         raise NotImplementedError
