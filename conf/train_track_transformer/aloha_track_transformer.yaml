@@ -18,14 +18,14 @@ wandb:
 train_gpus: [0]
 
 # Training
-lr: 1e-4
-batch_size: 128
+lr: 5.0e-5
+batch_size: 256
 mix_precision: true
 num_workers: 8
-val_freq: 10
+val_freq: 5
 save_freq: 1
 clip_grad: 10.
-epochs: 101
+epochs: 4004
 seed: 0
 dry: false
 

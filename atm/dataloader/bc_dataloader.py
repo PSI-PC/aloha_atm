@@ -11,13 +11,14 @@ class BCDataset(BaseDataset):
         self.track_obs_fs = track_obs_fs
 
     def __getitem__(self, index):
+        index = index # mal 10
         demo_id = self._index_to_demo_id[index]
         view = self.views[self._index_to_view_id[index]]
         snippet_idx = self._index_to_snippet_id[index]
         snippet_key = f"snippet_{snippet_idx}"
         demo_start_index = self._demo_id_to_start_indices[demo_id, snippet_idx]
 
-        time_offset = index - demo_start_index
+        time_offset = index #- demo_start_index
 
         if self.cache_all:
             demo = self._cache[demo_id]
@@ -50,7 +51,9 @@ class BCDataset(BaseDataset):
         for view in self.views:
             all_time_step_tracks = []
             all_time_step_vis = []
-            for track_start_index in range(time_offset, time_offset+self.frame_stack):
+            # if(time_offset == 102):
+            #     print(1)
+            for track_start_index in range(time_offset - demo_start_index, time_offset+self.frame_stack - demo_start_index):
                 all_time_step_tracks.append(demo["root"][view][snippet_key]["tracks"][track_start_index:track_start_index + self.num_track_ts])  # track_len n 2
                 all_time_step_vis.append(demo["root"][view][snippet_key]['vis'][track_start_index:track_start_index + self.num_track_ts])  # track_len n
             all_view_tracks.append(torch.stack(all_time_step_tracks, dim=0))

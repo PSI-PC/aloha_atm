@@ -25,7 +25,7 @@ class ATMPretrainDataset(BaseDataset):
 
             view_key = demo["root"][self.views[0]]
 
-            for snippet_idx in range(len(view_key)):
+            for snippet_idx in range(0, len(view_key), 2):
                 demo_len = demo["root"][self.views[0]][f"snippet_{snippet_idx}"]["video"][0].shape[0]
 
                 if self.cache_all:
@@ -52,7 +52,7 @@ class ATMPretrainDataset(BaseDataset):
         snippet_key = f"snippet_{snippet_idx}"
         demo_start_index = self._demo_id_to_start_indices[demo_id, snippet_idx]
 
-        time_offset = index - demo_start_index
+        time_offset = index #- demo_start_index
 
         if self.cache_all:
             demo = self._cache[demo_id]
@@ -65,8 +65,9 @@ class ATMPretrainDataset(BaseDataset):
             demo = self.process_demo(self.load_h5(demo_pth), snippet_idx)
             vids = self._load_image_list_from_demo(demo, view, snippet_key, time_offset, backward=True)  # t c h w
 
-        tracks = demo["root"][view][snippet_key]["tracks"][time_offset:time_offset + self.num_track_ts]  # track_len n 2
-        vis = demo["root"][view][snippet_key]['vis'][time_offset:time_offset + self.num_track_ts]  # track_len n
+        track_start_index = time_offset - demo_start_index
+        tracks = demo["root"][view][snippet_key]["tracks"][track_start_index:track_start_index + self.num_track_ts]  # track_len n 2
+        vis = demo["root"][view][snippet_key]['vis'][track_start_index:track_start_index + self.num_track_ts]  # track_len n
         task_emb = demo["root"]["task_emb_bert"]  # (dim,)
 
         # augment videos

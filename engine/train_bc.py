@@ -166,18 +166,29 @@ def run_one_epoch(fabric,
 
     model.train()
     i = 0
-    for obs, track_obs, track, task_emb, action, extra_states in tqdm(dataloader):
+
+    # with batch accumulation
+    accum_iter = 1 # 8
+
+    for batch_idx, (obs, track_obs, track, task_emb, action, extra_states) in enumerate(tqdm(dataloader)):
         if mix_precision:
             obs, track_obs, track, task_emb, action = obs.bfloat16(), track_obs.bfloat16(), track.bfloat16(), task_emb.bfloat16(), action.bfloat16()
             extra_states = {k: v.bfloat16() for k, v in extra_states.items()}
 
         loss, ret_dict = model.forward_loss(obs, track_obs, track, task_emb, extra_states, action)
-        optimizer.zero_grad()
+        loss = loss / accum_iter # with gradient accumulation
+        
+        # optimizer.zero_grad() # without gradient accumulation
         fabric.backward(loss)
 
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_grad)
+        # gradient accumulation
+        if ((batch_idx + 1) % accum_iter == 0) or (batch_idx + 1 == len(dataloader)):
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_grad)
+            optimizer.step()
+            optimizer.zero_grad()
 
-        optimizer.step()
+        # torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_grad) # without gradient accumulation
+        # optimizer.step() # without gradient accumulation
 
         for k, v in ret_dict.items():
             if k not in tot_loss_dict:

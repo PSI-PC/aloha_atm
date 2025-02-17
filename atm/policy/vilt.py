@@ -471,12 +471,16 @@ class BCViLTPolicy(nn.Module):
         B = obs.shape[0]
 
         # expand time dimenstion
-        obs = rearrange(obs, "b v h w c -> b v 1 c h w").copy()
+        if isinstance(obs, torch.Tensor):
+            obs = rearrange(obs, "b v h w c -> b v 1 c h w").clone()
+        else:
+            obs = rearrange(obs, "b v h w c -> b v 1 c h w").copy()
         extra_states = {k: rearrange(v, "b e -> b 1 e") for k, v in extra_states.items()}
 
         dtype = next(self.parameters()).dtype
         device = next(self.parameters()).device
-        obs = torch.Tensor(obs).to(device=device, dtype=dtype)
+        if not isinstance(obs, torch.Tensor):
+            obs = torch.Tensor(obs).to(device=device, dtype=dtype)
         task_emb = torch.Tensor(task_emb).to(device=device, dtype=dtype)
         extra_states = {k: torch.Tensor(v).to(device=device, dtype=dtype) for k, v in extra_states.items()}
 
@@ -505,7 +509,7 @@ class BCViLTPolicy(nn.Module):
             action = action.detach().cpu()  # (b, act_dim)
 
         action = action.reshape(-1, *self.act_shape)
-        action = torch.clamp(action, -1, 1)
+        action = torch.clamp(action, -1.5, 1.5) #-1 | 1
         return action.float().cpu().numpy(), (None, rec_tracks[:, :, -1, :, :, :])  # (b, *act_shape)
 
     def reset(self):

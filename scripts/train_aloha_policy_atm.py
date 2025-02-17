@@ -7,8 +7,16 @@ from glob import glob
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # default track transformer path
+# DEFAULT_TRACK_TRANSFORMERS = [
+#     "./results/track_transformer/0129_aloha_track_transformer_ep101_1503",
+# ]
+
+# get the last generated result folder from track transformer
+track_transformer_result_dir_path = "./results/track_transformer/"
+track_transformer_result_dir = [d for d in os.listdir(track_transformer_result_dir_path)]
+latest_result_dir = track_transformer_result_dir[-1]
 DEFAULT_TRACK_TRANSFORMERS = [
-    "./results/track_transformer/0124_aloha_track_transformer_ep101_1300",
+    str(track_transformer_result_dir_path + latest_result_dir)
 ]
 
 # input parameters
@@ -23,7 +31,7 @@ CONFIG_NAME = "libero_vilt"
 
 train_gpu_ids = [0]
 root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
-NUM_DEMOS = len(next(os.walk(root_dir))[1]) - 2
+NUM_DEMOS = 112 #len(next(os.walk(root_dir))[1]) - 3
 
 
 # suite_name = args.suite
@@ -33,8 +41,8 @@ NUM_DEMOS = len(next(os.walk(root_dir))[1]) - 2
 # dataset
 # train_path_list = [f"{root_dir}/{suite_name}/{task_dir}/bc_train_{NUM_DEMOS}" for task_dir in task_dir_list]
 # val_path_list = [f"{root_dir}/{suite_name}/{task_dir}/val" for task_dir in task_dir_list]
-train_dataset_list = glob(os.path.join(root_dir, "train/"))
-val_dataset_list = glob(os.path.join(root_dir, "val/"))
+train_dataset_list = glob(os.path.join(root_dir, "eval/"))
+val_dataset_list = glob(os.path.join(root_dir, "eval/"))
 
 track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
 

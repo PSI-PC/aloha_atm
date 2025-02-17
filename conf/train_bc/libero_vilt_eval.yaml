@@ -3,12 +3,12 @@ defaults:
 
 experiment: atm-policy_demo1 # tag for wandb and log dir
 
-hydra:
-  run:
-    dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
-  sweep:
-    dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
-    subdir: ${hydra.job.num}
+# hydra:
+#   run:
+#     dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
+#   sweep:
+#     dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
+#     subdir: ${hydra.job.num}
 
 wandb:
   project: atm_policy
@@ -69,7 +69,7 @@ model_cfg:
   obs_cfg:
     obs_shapes:
       rgb: [3, 128, 128]
-      tracks: [16, 32, 2]
+      tracks: [16, 32, 1]
     img_mean: [ 0., 0., 0. ]
     img_std: [ 1.0, 1.0, 1.0 ]
     num_views: 1
@@ -89,7 +89,7 @@ model_cfg:
     extra_num_layers: 0
     extra_hidden_size: 128
   track_cfg:
-    track_fn: ./results/track_transformer/0109_aloha_track_transformer_ep101_1332/
+    track_fn: ./results/track_transformer/0131_aloha_track_transformer_ep101_1425
     policy_track_patch_size: 16
     use_zero_track: false
   spatial_transformer_cfg:

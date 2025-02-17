@@ -148,7 +148,6 @@ def track_through_video(video, track_model, num_points=150):
     pred_vis = torch.cat([pred_grid_vis, pred_vis], dim=2)
     return pred_tracks, pred_vis
 
-
 def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_names, track_model, task_emb, num_points, visualizer, save_vis=True):
     actions = np.array(demonstration['action'])
     root_grp = new_hdf5_file.create_group("root") if "root" not in new_hdf5_file else new_hdf5_file["root"]

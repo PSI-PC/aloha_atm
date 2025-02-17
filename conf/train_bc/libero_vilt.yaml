@@ -18,14 +18,14 @@ wandb:
 train_gpus: [0]
 
 # Training
-lr: 6.25e-5 #5e-4
-batch_size: 16 #128
+lr: 1.25e-4
+batch_size: 32
 mix_precision: false
 num_workers: 8
 val_freq: 5
 save_freq: 10
 clip_grad: 100.
-epochs: 101
+epochs: 4004
 seed: 0
 dry: false
 
@@ -69,7 +69,7 @@ model_cfg:
   obs_cfg:
     obs_shapes:
       rgb: [3, 128, 128]
-      tracks: [16, 32, 2]
+      tracks: [16, 32, 1]
     img_mean: [ 0., 0., 0. ]
     img_std: [ 1.0, 1.0, 1.0 ]
     num_views: 1

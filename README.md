@@ -10,3 +10,13 @@ This is the documentation for our praktikum and seminar "Deep Learning in Roboti
 
 ## Changes from original ATM
 - cotracker3 instead of cotracker2 (loading issues)
+
+## IMPORTANT
+- don't touch libero folder
+
+## PROCEDURE
+- preprocess_aloha
+- split_aloha_dataset
+- train_aloha_track_transformer
+- train_aloha_policy
+- eval_policy_network / merge_videos

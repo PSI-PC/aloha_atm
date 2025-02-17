@@ -98,7 +98,7 @@ class BaseDataset(Dataset):
                 self.views.sort()
 
             view_key = demo["root"][self.views[0]]
-            for snippet_idx in range(len(view_key)):
+            for snippet_idx in range(0, len(view_key), 2):
                 demo_len = view_key[f"snippet_{snippet_idx}"]["video"][0].shape[0]
 
                 if self.cache_all:
@@ -226,7 +226,7 @@ class BaseDataset(Dataset):
             return h5_to_dict(f)
 
     def __len__(self):
-        return len(self._index_to_demo_id)
+        return len(self._index_to_demo_id) # int & durch 10 gemacht
 
     def __getitem__(self, index):
         raise NotImplementedError

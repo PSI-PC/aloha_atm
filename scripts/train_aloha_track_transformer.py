@@ -24,8 +24,8 @@ def get_config():
     # setup number of epoches and dataset path
 
     EPOCH = 101
-    train_dataset_list = glob(os.path.join(root_dir, "train/"))
-    val_dataset_list = glob(os.path.join(root_dir, "val/"))
+    train_dataset_list = glob(os.path.join(root_dir, "train_1/"))
+    val_dataset_list = glob(os.path.join(root_dir, "val_1/"))
     # Manually build a dictionary configuration
     config = {
         'config_name': CONFIG_NAME,  # Replace with your actual config name
@@ -75,9 +75,9 @@ if __name__ == "__main__":
     gpu_ids = [0]
     root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
     # setup number of epoches and dataset path
-    EPOCH = 101
-    train_dataset_list = glob(os.path.join(root_dir, "train/"))
-    val_dataset_list = glob(os.path.join(root_dir, "val/"))
+    EPOCH = 4004
+    train_dataset_list = glob(os.path.join(root_dir, "eval/"))
+    val_dataset_list = glob(os.path.join(root_dir, "eval/"))
     
     sys.argv = [
         'train_aloha_track_transformer.py', 

@@ -3,10 +3,10 @@ from pathlib import Path
 import glob
 import os
 
-policy_folder_path = Path("./wandb/offline-run-20250109_161927-3my7k2qx/files/media/videos/train")
-track_transformer_folder_path = Path("./wandb/offline-run-20250109_133214-0chi7y0q/files/media/videos/train")
+policy_folder_path = Path("./wandb/run-20250130_124812-1hlbzqhf/files/media/videos/train")
+track_transformer_folder_path = Path("./wandb/run-20250130_123009-ti073yvx/files/media/videos/train")
 
-cotracker_folder_path = Path("./data/preprocessed_demos/episode_1/videos")
+cotracker_folder_path = Path("./data/preprocessed_demos/aloha_lamp/lamp_right_arm/episode_15/videos")
 
 video_output_path = Path("./output_videos")
 
