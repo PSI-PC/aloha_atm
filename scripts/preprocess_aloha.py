@@ -208,8 +208,8 @@ def collect_states_from_demo(new_hdf5_file, demonstration, image_save_dir, view_
             view_grp.__delitem__("tracks")
         if "vis" in view_grp:
             view_grp.__delitem__("vis")
-        view_grp.create_dataset("tracks", data=pred_tracks.cuda().numpy())
-        view_grp.create_dataset("vis", data=pred_vis.cuda().numpy())
+        view_grp.create_dataset("tracks", data=pred_tracks.cpu().numpy())
+        view_grp.create_dataset("vis", data=pred_vis.cpu().numpy())
 
         # save image pngs
         save_images(rearrange(rgb, "t c h w -> t h w c"), image_save_dir, view)
@@ -267,7 +267,7 @@ def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model):
         os.makedirs(video_path, exist_ok=True)
     visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
 
-    num_points = 1000 #150 # originally 1000
+    num_points = 250 #150 # originally 1000
     with torch.no_grad():
         save_path = os.path.join(target_dir, f"preprocessed_{file_name}.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
