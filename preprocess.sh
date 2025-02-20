@@ -4,6 +4,8 @@
 #SBATCH --mem=64000
 #SBATCH --gres=gpu:1
 
+module load devel/miniconda
+
 conda env create -f environment.yml
 conda activate aloha_atm
 
