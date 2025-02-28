@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --ntasks=40
-#SBATCH --time=08:00:00
-#SBATCH --mem=64000
+#SBATCH --time=48:00:00
 #SBATCH --gres=gpu:1
+#SBATCH --mail-user=pascal.siekiera@gmx.de
 
 module load devel/miniconda
 
