@@ -74,6 +74,7 @@ class BaseDataset(Dataset):
         print(f"found {len(self.buffer_fns)} trajectories in the specified folders: {self.dataset_dir}")
 
         self._cache = []
+        self._index_to_view_id = {}
         self._index_to_demo_id, self._demo_id_to_path, self._demo_id_to_start_indices, self._demo_id_to_demo_length \
             = {}, {}, {}, {}
         self.load_demo_info()
@@ -105,6 +106,7 @@ class BaseDataset(Dataset):
                 self._cache.append(demo)
             self._demo_id_to_path[demo_idx] = fn
             self._index_to_demo_id.update({k: demo_idx for k in range(start_idx, start_idx + demo_len)})
+            self._index_to_view_id.update({k: 0 for k in range(start_idx, start_idx + demo_len)})
             self._demo_id_to_start_indices[demo_idx] = start_idx
             self._demo_id_to_demo_length[demo_idx] = demo_len
             start_idx += demo_len
@@ -184,21 +186,23 @@ class BaseDataset(Dataset):
         demo_path = self._demo_id_to_path[demo_id]
         demo_parent_dir = os.path.dirname(os.path.dirname(demo_path))
         demo_name = os.path.basename(demo_path).split(".")[0]
-        images_dir = os.path.join(demo_parent_dir, f"episode_{demo_id}/images", view, demo_name)
+        images_dir = os.path.join(demo_parent_dir, f"episode_{demo_id}/images")
 
         if backward:
             image_indices = np.arange(max(time_offset + 1 - num_frames, 0), time_offset + 1)
             image_indices = np.clip(image_indices, a_min=None, a_max=demo_length-1)
-            frames = [self.load_image_func(os.path.join(images_dir, f"image_{img_idx}.png")) for img_idx in image_indices]
+            frames = [self.load_image_func(os.path.join(images_dir, f"{view}_{img_idx}.png")) for img_idx in image_indices]
             frames = [np.zeros_like(frames[0]) for _ in range(num_frames - len(frames))] + frames  # padding with black images
         else:
             image_indices = np.arange(time_offset, time_offset + num_frames)
             image_indices = np.clip(image_indices, a_min=0, a_max=demo_length-1)
-            frames = [self.load_image_func(os.path.join(images_dir, f"image_{img_idx}.png")) for img_idx in image_indices]
+            frames = [self.load_image_func(os.path.join(images_dir, f"{view}_{img_idx}.png")) for img_idx in image_indices]
 
         frames = np.stack(frames)  # t h w c
         frames = torch.Tensor(frames)
         frames = rearrange(frames, "t h w c -> t c h w")
+
+        frames = F.interpolate(frames, size=self.img_size, mode="bilinear", align_corners=False)
         return frames
 
     def load_h5(self, fn):

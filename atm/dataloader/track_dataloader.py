@@ -29,11 +29,11 @@ class ATMPretrainDataset(BaseDataset):
                     del demo["root"][v]["video"]
                 self._cache.append(demo)
             self._demo_id_to_path[demo_idx] = fn
-            self._index_to_demo_id.update({k: demo_idx for k in range(start_idx, start_idx + demo_len*2)})
-            self._index_to_view_id.update({k: (k - start_idx) % 2 for k in range(start_idx, start_idx + demo_len*2)})
+            self._index_to_demo_id.update({k: demo_idx for k in range(start_idx, start_idx + demo_len)})
+            self._index_to_view_id.update({k: 0 for k in range(start_idx, start_idx + demo_len)})
             self._demo_id_to_start_indices[demo_idx] = start_idx
             self._demo_id_to_demo_length[demo_idx] = demo_len
-            start_idx += demo_len * 2
+            start_idx += demo_len
 
         num_samples = len(self._index_to_demo_id)
         assert num_samples == start_idx

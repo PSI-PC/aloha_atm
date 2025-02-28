@@ -16,20 +16,21 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from einops import rearrange
 
+policy_result_dir_path = "./results/policy/"
+policy_result_dir = [d for d in os.listdir(policy_result_dir_path)]
+latest_result_dir = policy_result_dir[-1]
+model_path = Path(str(policy_result_dir_path + latest_result_dir + "/model_best.ckpt"))
+
 # to edit each time
-model_path = Path("./results/policy/0215_atm-policy_demo112_0006_seed0/model_best.ckpt")
-figure_name = "all_action_plots_ultimate_overfit_4004.png"
+# model_path = Path("./results/policy/0223_atm-policy_demo1_1605_seed0/model_best.ckpt")
+figure_name = "all_action_plots_full_vid_36_cluster.png"
 
 @hydra.main(config_path="../conf/train_bc", config_name="libero_vilt_eval.yaml", version_base="1.3")
 def evaluate_policy(cfg: DictConfig):
     root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
     dataset = BCDataset(dataset_dir=glob(os.path.join(root_dir, "eval/")), **cfg.dataset_cfg, aug_prob=cfg.aug_prob)
     dataloader = get_dataloader(dataset, mode="val", num_workers=cfg.num_workers, batch_size=cfg.batch_size)
-    
-    # policy_result_dir_path = "./results/policy/"
-    # policy_result_dir = [d for d in os.listdir(policy_result_dir_path)]
-    # latest_result_dir = policy_result_dir[-2]
-    # model_path = Path(str(policy_result_dir_path + latest_result_dir + "/model_best.ckpt"))
+
     model_cls = eval(cfg.model_name)
     model = model_cls(**cfg.model_cfg)
     model.load(model_path)
