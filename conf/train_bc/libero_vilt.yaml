@@ -18,8 +18,8 @@ wandb:
 train_gpus: [0]
 
 # Training
-lr: 1.25e-4
-batch_size: 32
+lr: 5.0e-4 #1.25e-4
+batch_size: 128
 mix_precision: false
 num_workers: 8
 val_freq: 5
