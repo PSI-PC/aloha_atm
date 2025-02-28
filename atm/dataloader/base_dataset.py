@@ -88,6 +88,7 @@ class BaseDataset(Dataset):
         start_idx = 0
         for demo_idx, fn in enumerate(self.buffer_fns):
             demo = self.load_h5(fn)
+            
 
             if self.views is None:
                 self.views = list(demo["root"].keys())

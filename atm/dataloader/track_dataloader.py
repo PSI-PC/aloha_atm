@@ -43,7 +43,7 @@ class ATMPretrainDataset(BaseDataset):
         view = self.views[self._index_to_view_id[index]]
         demo_start_index = self._demo_id_to_start_indices[demo_id]
 
-        time_offset = (index - demo_start_index) // 2
+        time_offset = index - demo_start_index
 
         if self.cache_all:
             demo = self._cache[demo_id]
