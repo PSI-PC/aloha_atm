@@ -7,6 +7,7 @@ import numpy as np
 import torch.distributed as dist
 import lightning
 from lightning.fabric import Fabric
+from pathlib import Path
 
 import os
 import wandb
@@ -75,6 +76,7 @@ def main(cfg: DictConfig):
 
     fabric.barrier()
     for epoch in metric_logger.log_every(range(cfg.epochs), 1, ""):
+        print('EPOCH', epoch)
         train_metrics = run_one_epoch(
             fabric,
             model,

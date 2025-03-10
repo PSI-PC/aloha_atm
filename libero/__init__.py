@@ -6,6 +6,7 @@ libero_config_path = os.environ.get(
     "LIBERO_CONFIG_PATH", os.path.expanduser("~/.libero")
 )
 config_file = os.path.join(libero_config_path, "config.yaml")
+# config_file = os.path("./conf/train_bc/libero_vilt.yaml")
 
 
 def get_default_path_dict(custom_location=None):

@@ -1,46 +1,29 @@
-defaults:
-  - _self_
-
-experiment: atm-policy_demo1 # tag for wandb and log dir
-
-# hydra:
-#   run:
-#     dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
-#   sweep:
-#     dir: ./results/policy/${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}
-#     subdir: ${hydra.job.num}
-
+experiment: atm-policy_demo1
 wandb:
   project: atm_policy
   name: ${now:%m%d}_${experiment}_${now:%H%M}_seed${seed}_${hydra:job.num}
   group: ${experiment}
-
-train_gpus: [0]
-
-# Training
-lr: 3.90625e-6 #6.25e-5 #5e-4
-batch_size: 1 #16 #128
+train_gpus:
+- 0
+lr: 3.90625e-06
+batch_size: 1
 mix_precision: false
 num_workers: 8
 val_freq: 5
 save_freq: 10
-clip_grad: 100.
+clip_grad: 100.0
 epochs: 101
 seed: 0
 dry: false
-
 img_size: 128
 frame_stack: 10
 num_track_ts: 16
 num_track_ids: 32
 extra_state_keys: []
-
 aug_prob: 0.9
-
 train_dataset: data/preprocessed_demos/train
 val_dataset: data/preprocessed_demos/val
 val_num_demos: null
-
 env_cfg:
   env_type: libero
   render_gpu_ids: 0
@@ -49,35 +32,46 @@ env_cfg:
   env_name: []
   task_name: []
   env_meta_fn: []
-
 optimizer_cfg:
   type: optim.AdamW
   params:
     lr: ${lr}
-    weight_decay: 1e-4
-
+    weight_decay: 0.0001
 scheduler_cfg:
   type: CosineAnnealingLR
   params:
     T_max: ${epochs}
-    eta_min: 0.
+    eta_min: 0.0
     last_epoch: -1
-
 model_name: BCViLTPolicy
 model_cfg:
   load_path: null
   obs_cfg:
     obs_shapes:
-      rgb: [3, 128, 128]
-      tracks: [16, 32, 1]
-    img_mean: [ 0., 0., 0. ]
-    img_std: [ 1.0, 1.0, 1.0 ]
+      rgb:
+      - 3
+      - 128
+      - 128
+      tracks:
+      - 16
+      - 32
+      - 1
+    img_mean:
+    - 0.0
+    - 0.0
+    - 0.0
+    img_std:
+    - 1.0
+    - 1.0
+    - 1.0
     num_views: 1
     extra_states: ${extra_state_keys}
     max_seq_len: ${frame_stack}
   img_encoder_cfg:
     network_name: PatchEncoder
-    patch_size: [8, 8]
+    patch_size:
+    - 8
+    - 8
     embed_size: 128
     no_patch_embed_bias: false
   language_encoder_cfg:
@@ -110,12 +104,12 @@ model_cfg:
     use_language_token: false
   policy_head_cfg:
     network_name: DeterministicHead
-    output_size: [14,]
+    output_size:
+    - 14
     hidden_size: 1024
     num_layers: 2
     loss_coef: 1.0
     action_squash: false
-
 dataset_cfg:
   img_size: ${img_size}
   frame_stack: ${frame_stack}

@@ -4,7 +4,7 @@ import glob
 import os
 
 policy_folder_path = Path("./wandb/run-20250130_124812-1hlbzqhf/files/media/videos/train")
-track_transformer_folder_path = Path("./wandb/run-20250130_123009-ti073yvx/files/media/videos/train")
+track_transformer_folder_path = Path("./wandb/run-20250303_020028-5do80myc/files/media/videos/train")
 
 cotracker_folder_path = Path("./data/preprocessed_demos/aloha_lamp/lamp_right_arm/episode_15/videos")
 
@@ -67,9 +67,9 @@ def merge_cotracker_videos(folder_path):
     final_clip.write_videofile(output_path)
 
 def main():
-    merge_cotracker_videos(cotracker_folder_path)
+    # merge_cotracker_videos(cotracker_folder_path)
     merge_policy_or_track_transformer_videos(track_transformer_folder_path)
-    merge_policy_or_track_transformer_videos(policy_folder_path)
+    # merge_policy_or_track_transformer_videos(policy_folder_path)
 
 if __name__ == "__main__":
     main()
