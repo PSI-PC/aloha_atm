@@ -310,7 +310,7 @@ def main():
     print("FINISH LOADING COTRACKER")
 
     task_name = "put lampshade on lampholder"
-    origin_dir = "data/demos/aloha_lamp/lamp_right_arm"
+    origin_dir = "data/demos/aloha_lamp/lamp_right_arm/new_episodes"
     result_dir = "data/preprocessed_demos/aloha_lamp/lamp_right_arm"
 
     print("START LOADING EMBEDDING")
