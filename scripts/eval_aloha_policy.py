@@ -23,7 +23,7 @@ model_path = Path(str(policy_result_dir_path + latest_result_dir + "/model_best.
 
 # to edit each time
 # model_path = Path("./results/policy/0223_atm-policy_demo1_1605_seed0/model_best.ckpt")
-figure_name = "all_action_plots_full_vid_36_cluster_act_zwischenstand.png"
+figure_name = "all_action_plots_full_vid_36_cluster_act.png"
 
 @hydra.main(config_path="../conf/train_bc", config_name="libero_vilt_eval.yaml", version_base="1.3")
 def evaluate_policy(cfg: DictConfig):
