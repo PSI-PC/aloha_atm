@@ -23,7 +23,7 @@ model_path = Path(str(policy_result_dir_path + latest_result_dir + "/model_best.
 
 # to edit each time
 # model_path = Path("./results/policy/0223_atm-policy_demo1_1605_seed0/model_best.ckpt")
-figure_name = "all_action_plots_full_vid_36_cluster.png"
+figure_name = "all_action_plots_full_vid_36_cluster_act_zwischenstand.png"
 
 @hydra.main(config_path="../conf/train_bc", config_name="libero_vilt_eval.yaml", version_base="1.3")
 def evaluate_policy(cfg: DictConfig):
@@ -43,18 +43,18 @@ def evaluate_policy(cfg: DictConfig):
     with torch.no_grad():
         for obs, track_obs, track, task_emb, action, extra_states in tqdm(dataloader):
             # obs = obs[:,:,0:1]
-            # obs = rearrange(obs, "b v 1 c h w -> b v h w c")
-            obs, track, action = model.preprocess(obs, track, action)
-            pred_action = model.forward(obs, track_obs, track, task_emb, extra_states)
-            # pred_action, _ = model.act(obs, task_emb, extra_states)
+            obs = rearrange(obs, "b v 1 c h w -> b v h w c")
+            # obs, track, action = model.preprocess(obs, track, action)
+            # pred_action = model.forward(obs, track_obs, track, task_emb, extra_states)
+            pred_action, _ = model.act(obs, task_emb, extra_states)
             
             gt_actions.append(action[0, 0, :])
-            pred_actions.append(pred_action[0, 0, :])
-            # pred_actions.append(pred_action[0, :])
+            # pred_actions.append(pred_action[0, 0, :])
+            pred_actions.append(pred_action[0, :])
 
     gt_actions_array = np.array(torch.stack(gt_actions))
-    pred_actions_array = np.array(torch.stack(pred_actions))
-    # pred_actions_array = np.array(pred_actions)
+    # pred_actions_array = np.array(torch.stack(pred_actions))
+    pred_actions_array = np.array(pred_actions)
 
     t = np.arange(0, len(gt_actions_array[:, 0]))
 
@@ -69,6 +69,7 @@ def evaluate_policy(cfg: DictConfig):
         ax = axes[i]
         ax.plot(t, gt_actions_array[:, i], 'b', label='Ground Truth')
         ax.plot(t, pred_actions_array[:, i], 'r', label='Predicted')
+        ax.set_ylim(-1, 1.25)
         ax.set_title(f'Action Dimension {i}')
         ax.legend()
     
