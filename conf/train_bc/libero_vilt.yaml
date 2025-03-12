@@ -65,7 +65,7 @@ scheduler_cfg:
 
 model_name: BCViLTPolicy
 model_cfg:
-  load_path: ./results/policy/0303_atm-policy_demo36_1726_seed0/model_best.ckpt
+  load_path: null
   obs_cfg:
     obs_shapes:
       rgb: [3, 128, 128]
