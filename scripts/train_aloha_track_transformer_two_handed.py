@@ -71,9 +71,9 @@ def main():
     ttt.main()
 
 if __name__ == "__main__":
-    CONFIG_NAME = "aloha_track_transformer"
+    CONFIG_NAME = "aloha_track_transformer_two_handed"
     gpu_ids = [0]
-    root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
+    root_dir = "./data/preprocessed_demos/aloha_hand_lampshade/"
     # setup number of epoches and dataset path
     EPOCH = 1001
     train_dataset_list = glob(os.path.join(root_dir, "train/"))
