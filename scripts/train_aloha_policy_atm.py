@@ -30,7 +30,7 @@ DEFAULT_TRACK_TRANSFORMERS = [
 CONFIG_NAME = "libero_vilt"
 
 train_gpu_ids = [0]
-root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
+root_dir = "./data/preprocessed_demos/aloha_hand_lampshade/"
 NUM_DEMOS = 36 #len(next(os.walk(root_dir))[1]) - 3
 
 

@@ -40,7 +40,7 @@ def split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[10, 20, 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--folder', type=str, default='./data/preprocessed_demos/aloha_lamp/lamp_right_arm')
+    parser.add_argument('--folder', type=str, default='./data/preprocessed_demos/aloha_hand_lampshade')
     parser.add_argument('--train_ratio', type=float, default=0.9)
     args = parser.parse_args()
 

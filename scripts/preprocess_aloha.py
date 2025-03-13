@@ -76,7 +76,7 @@ def get_task_bert_embs(task_names): # originally root_dir also
     # task_names = set([get_task_name_from_file_name(os.path.basename(file).split('.')[0]) for file in h5_files])
     # task_names = list(task_names)
 
-    if not os.path.exists("aloha/task_embedding_caches/task_emb_bert.npy"):
+    if not os.path.exists("aloha/task_embedding_caches/task_emb_bert_twohanded.npy"):
         # set the task embeddings
         cfg = EasyDict({
             "task_embedding_format": "bert",
@@ -90,9 +90,9 @@ def get_task_bert_embs(task_names): # originally root_dir also
         task_name_to_emb = {task_names[i]: task_embs[i] for i in range(len(task_names))}
 
         os.makedirs("aloha/task_embedding_caches/", exist_ok=True)
-        np.save("aloha/task_embedding_caches/task_emb_bert.npy", task_name_to_emb)
+        np.save("aloha/task_embedding_caches/task_emb_bert_twohanded.npy", task_name_to_emb)
     else:
-        task_name_to_emb = np.load("aloha/task_embedding_caches/task_emb_bert.npy", allow_pickle=True).item()
+        task_name_to_emb = np.load("aloha/task_embedding_caches/task_emb_bert_twohanded.npy", allow_pickle=True).item()
     return task_name_to_emb
 
 
@@ -267,7 +267,7 @@ def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model):
         os.makedirs(video_path, exist_ok=True)
     visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
 
-    num_points = 250 #150 # originally 1000
+    num_points = 1000 #150 # originally 1000
     with torch.no_grad():
         save_path = os.path.join(target_dir, f"preprocessed_{file_name}.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
@@ -309,9 +309,9 @@ def main():
 
     print("FINISH LOADING COTRACKER")
 
-    task_name = "put lampshade on lampholder"
-    origin_dir = "data/demos/aloha_lamp/lamp_right_arm/new_episodes"
-    result_dir = "data/preprocessed_demos/aloha_lamp/lamp_right_arm"
+    task_name = "pick up the lampshade, hand the lampshade to the other hand which puts it on the lampholder"
+    origin_dir = "data/demos/aloha_hand_lampshade"
+    result_dir = "data/preprocessed_demos/aloha_hand_lampshade"
 
     print("START LOADING EMBEDDING")
 

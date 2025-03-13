@@ -6,7 +6,7 @@
 
 module load devel/miniconda
 
-conda env create -f environment.yml
+# conda env create -f environment.yml
 conda activate aloha_atm
 
 python3 scripts/preprocess_aloha.py
