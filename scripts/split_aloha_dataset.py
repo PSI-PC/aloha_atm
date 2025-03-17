@@ -2,6 +2,7 @@ import argparse
 import os
 import glob
 from natsort import natsorted
+import random
 
 def split_pretrain_dataset(files, train_folder, val_folder, train_ratio):
     num_files = len(files)
@@ -49,13 +50,17 @@ if __name__ == '__main__':
     if len(files) == 0:
         raise ValueError('No .hdf5 files found in {}'.format(args.folder))
 
-    files = natsorted(files)
+    # files = natsorted(files)
+    # for the 20 percent training
+    num_files_to_select = int(len(files) * 0.2)
+    random.shuffle(files)
+    selected_files = files[:num_files_to_select]
 
-    train_folder = os.path.join(root_dir, 'train')
-    val_folder = os.path.join(root_dir, 'val')
+    train_folder = os.path.join(root_dir, 'train_20perc')
+    val_folder = os.path.join(root_dir, 'val_20perc')
 
     if not os.path.exists(train_folder):
-        split_pretrain_dataset(files, train_folder, val_folder, args.train_ratio)
+        split_pretrain_dataset(selected_files, train_folder, val_folder, args.train_ratio)
 
         # pretrain_train_folder = train_folder
         # split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
