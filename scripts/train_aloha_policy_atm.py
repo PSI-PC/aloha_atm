@@ -31,7 +31,7 @@ CONFIG_NAME = "libero_vilt"
 
 train_gpu_ids = [0]
 root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
-NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
+NUM_DEMOS = 15 #len(next(os.walk(root_dir))[1]) - 3
 
 
 # suite_name = args.suite
@@ -42,7 +42,7 @@ NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
 # train_path_list = [f"{root_dir}/{suite_name}/{task_dir}/bc_train_{NUM_DEMOS}" for task_dir in task_dir_list]
 # val_path_list = [f"{root_dir}/{suite_name}/{task_dir}/val" for task_dir in task_dir_list]
 train_dataset_list = glob(os.path.join(root_dir, "bc_train_20/"))
-val_dataset_list = glob(os.path.join(root_dir, "val/"))
+val_dataset_list = glob(os.path.join(root_dir, "bc_train_2/"))
 
 # track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
 track_fn = './results/track_transformer/0313_aloha_track_transformer_ep1001_0854'
