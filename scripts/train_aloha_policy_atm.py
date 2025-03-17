@@ -41,7 +41,7 @@ NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
 # dataset
 # train_path_list = [f"{root_dir}/{suite_name}/{task_dir}/bc_train_{NUM_DEMOS}" for task_dir in task_dir_list]
 # val_path_list = [f"{root_dir}/{suite_name}/{task_dir}/val" for task_dir in task_dir_list]
-train_dataset_list = glob(os.path.join(root_dir, "train/"))
+train_dataset_list = glob(os.path.join(root_dir, "bc_train_20/"))
 val_dataset_list = glob(os.path.join(root_dir, "val/"))
 
 # track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
