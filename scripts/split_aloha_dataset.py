@@ -46,7 +46,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     root_dir = os.path.join(args.folder)
-    files = glob.glob(os.path.join(root_dir, '*.hdf5'))
+    files = glob.glob(os.path.join(root_dir, '*/*.hdf5'))
     if len(files) == 0:
         raise ValueError('No .hdf5 files found in {}'.format(args.folder))
 
