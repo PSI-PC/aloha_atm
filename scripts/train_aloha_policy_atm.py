@@ -44,7 +44,8 @@ NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
 train_dataset_list = glob(os.path.join(root_dir, "train/"))
 val_dataset_list = glob(os.path.join(root_dir, "val/"))
 
-track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
+# track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
+track_fn = './results/track_transformer/0313_aloha_track_transformer_ep1001_0854'
 
 for seed in range(1):
     command = (f'python -m engine.train_bc --config-name={CONFIG_NAME} train_gpus="{train_gpu_ids}" '
