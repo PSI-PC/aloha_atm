@@ -59,10 +59,11 @@ if __name__ == '__main__':
 
     train_folder = os.path.join(root_dir, 'train_20perc')
     val_folder = os.path.join(root_dir, 'val_20perc')
+    pretrain_train_folder = os.path.join(root_dir, 'train')
 
     if not os.path.exists(train_folder):
         split_pretrain_dataset(selected_files, train_folder, val_folder, args.train_ratio)
 
         # pretrain_train_folder = train_folder
-        # split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
+        split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
 
