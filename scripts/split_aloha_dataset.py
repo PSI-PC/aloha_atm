@@ -53,6 +53,7 @@ if __name__ == '__main__':
     # files = natsorted(files)
     # for the 20 percent training
     num_files_to_select = int(len(files) * 0.2)
+    print(num_files_to_select)
     random.shuffle(files)
     selected_files = files[:num_files_to_select]
 
