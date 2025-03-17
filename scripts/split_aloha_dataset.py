@@ -53,7 +53,6 @@ if __name__ == '__main__':
     # files = natsorted(files)
     # for the 20 percent training
     num_files_to_select = int(len(files) * 0.2)
-    print(num_files_to_select)
     random.shuffle(files)
     selected_files = files[:num_files_to_select]
 
@@ -61,9 +60,11 @@ if __name__ == '__main__':
     val_folder = os.path.join(root_dir, 'val_20perc')
     pretrain_train_folder = os.path.join(root_dir, 'train')
 
-    if not os.path.exists(train_folder):
-        # split_pretrain_dataset(selected_files, train_folder, val_folder, args.train_ratio)
+    # if not os.path.exists(train_folder):
+    #     # split_pretrain_dataset(selected_files, train_folder, val_folder, args.train_ratio)
 
-        # pretrain_train_folder = train_folder
-        split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
+    #     # pretrain_train_folder = train_folder
+    #     split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
+
+    split_bc_train_dataset(root_dir, pretrain_train_folder, num_trains=[2, 5, 10, 20, 30, 40, 45])
 
