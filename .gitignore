@@ -4,3 +4,6 @@ output_videos/
 results/
 wandb/
 third_party/
+*.out
+*.pyc
+__pychache__/

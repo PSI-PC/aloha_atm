@@ -12,11 +12,12 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # ]
 
 # get the last generated result folder from track transformer
-track_transformer_result_dir_path = "./results/track_transformer/"
+track_transformer_result_dir_path = "./results/two_handed/track_transformer/"
 track_transformer_result_dir = [d for d in os.listdir(track_transformer_result_dir_path)]
-latest_result_dir = track_transformer_result_dir[-1]
+latest_result_dir = track_transformer_result_dir[-4]
 DEFAULT_TRACK_TRANSFORMERS = [
-    str(track_transformer_result_dir_path + latest_result_dir)
+    #str(track_transformer_result_dir_path + latest_result_dir)
+    str('./results/two_handed/track_transformer/0313_aloha_track_transformer_two_handed_ep1001_1648')
 ]
 
 # input parameters
@@ -27,11 +28,11 @@ DEFAULT_TRACK_TRANSFORMERS = [
 # args = parser.parse_args()
 
 # training configs
-CONFIG_NAME = "libero_vilt"
+CONFIG_NAME = "libero_vilt_two_handed"
 
 train_gpu_ids = [0]
-root_dir = "./data/preprocessed_demos/aloha_lamp/lamp_right_arm/"
-NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
+root_dir = "./data/preprocessed_demos/aloha_hand_lampshade/"
+NUM_DEMOS = 90 #len(next(os.walk(root_dir))[1]) - 3
 
 
 # suite_name = args.suite
@@ -44,8 +45,7 @@ NUM_DEMOS = 75 #len(next(os.walk(root_dir))[1]) - 3
 train_dataset_list = glob(os.path.join(root_dir, "train/"))
 val_dataset_list = glob(os.path.join(root_dir, "val/"))
 
-# track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
-track_fn = './results/track_transformer/0313_aloha_track_transformer_ep1001_0854'
+track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
 
 for seed in range(1):
     command = (f'python -m engine.train_bc --config-name={CONFIG_NAME} train_gpus="{train_gpu_ids}" '

@@ -267,7 +267,7 @@ def generate_data(source_h5_path, file_name, target_dir, task_emb, track_model):
         os.makedirs(video_path, exist_ok=True)
     visualizer = Visualizer(save_dir=video_path, pad_value=0, fps=24)
 
-    num_points = 250 #150 # originally 1000
+    num_points = 1000 #150 # originally 1000
     with torch.no_grad():
         save_path = os.path.join(target_dir, f"preprocessed_{file_name}.hdf5")
         new_hdf5_file = inital_save_h5(save_path)
@@ -310,8 +310,8 @@ def main():
     print("FINISH LOADING COTRACKER")
 
     task_name = "put lampshade on lampholder"
-    origin_dir = "data/demos/aloha_lamp/lamp_right_arm/new_episodes"
-    result_dir = "data/preprocessed_demos/aloha_lamp/lamp_right_arm"
+    origin_dir = "data/demos/aloha_lamp/lamp_right_arm/"
+    result_dir = "data/preprocessed_demos/aloha_lamp/1000keypoints"
 
     print("START LOADING EMBEDDING")
 
