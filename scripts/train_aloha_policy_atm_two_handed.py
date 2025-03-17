@@ -31,7 +31,7 @@ CONFIG_NAME = "libero_vilt_two_handed"
 
 train_gpu_ids = [0]
 root_dir = "./data/preprocessed_demos/aloha_hand_lampshade/"
-NUM_DEMOS = 90 #len(next(os.walk(root_dir))[1]) - 3
+NUM_DEMOS = 18 #len(next(os.walk(root_dir))[1]) - 3
 
 
 # suite_name = args.suite
@@ -41,10 +41,11 @@ NUM_DEMOS = 90 #len(next(os.walk(root_dir))[1]) - 3
 # dataset
 # train_path_list = [f"{root_dir}/{suite_name}/{task_dir}/bc_train_{NUM_DEMOS}" for task_dir in task_dir_list]
 # val_path_list = [f"{root_dir}/{suite_name}/{task_dir}/val" for task_dir in task_dir_list]
-train_dataset_list = glob(os.path.join(root_dir, "train/"))
+train_dataset_list = glob(os.path.join(root_dir, "bc_train_20/"))
 val_dataset_list = glob(os.path.join(root_dir, "val/"))
 
-track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
+# track_fn = DEFAULT_TRACK_TRANSFORMERS[0] # or args.track_transformer
+track_fn = glob(os.path.join(track_transformer_result_dir_path, '0313_aloha_track_transformer_two_handed_ep1001_1648'))
 
 for seed in range(1):
     command = (f'python -m engine.train_bc --config-name={CONFIG_NAME} train_gpus="{train_gpu_ids}" '
